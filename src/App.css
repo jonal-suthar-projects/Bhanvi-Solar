@@ -1,0 +1,321 @@
+/* =========================================
+   1. GLOBAL RESET & ROOT CENTERING (THE FIX)
+   ========================================= */
+   :root {
+    --primary: #0056b3;
+    --primary-dark: #004494;
+    --secondary: #ff8c00;
+    --bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --border: #e5e7eb;
+    --radius: 16px; /* Slightly rounder for modern look */
+  }
+  
+  /* Force HTML, Body, and React Root to take full screen space */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scrollbars */
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* This is usually the culprit. We force it to be full width. */
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligns form to top (better for scrolling) */
+  }
+  
+  /* =========================================
+     2. APP CONTAINER & CARD
+     ========================================= */
+  .app-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 15px; /* Adds breathing room on mobile edges */
+    box-sizing: border-box;
+  }
+  
+  .main-card {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 550px; /* Optimal width for desktop reading */
+    border-radius: var(--radius);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    padding: 30px 25px;
+    box-sizing: border-box;
+    /* Ensure card itself is centered if flex fails */
+    margin: 0 auto; 
+  }
+  
+  /* =========================================
+     3. HEADER & STEPPER
+     ========================================= */
+  .app-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .app-header h1 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    margin: 0 0 5px 0;
+    font-weight: 700;
+  }
+  .app-header p {
+    color: var(--secondary);
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 500;
+  }
+  
+  /* Stepper */
+  .stepper {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 35px;
+    padding: 0 5px;
+  }
+  .step-bar-bg {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e5e7eb;
+    z-index: 0;
+    transform: translateY(-50%);
+  }
+  .step-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.4s ease;
+  }
+  .step-dot {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 1;
+    color: #9ca3af;
+    transition: all 0.3s;
+  }
+  .step-dot.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15);
+  }
+  
+  /* =========================================
+     4. FORM ELEMENTS
+     ========================================= */
+  .section-header {
+    margin-bottom: 25px;
+  }
+  .section-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--text);
+  }
+  .section-header p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 5px;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  /* Desktop: 2 columns */
+  @media (min-width: 600px) {
+    .form-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .full-width {
+      grid-column: span 2;
+    }
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+  }
+  
+  /* INPUTS */
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    padding: 14px; /* Larger touch target */
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px; /* Prevents iOS zoom */
+    background: #f9fafb;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    transition: all 0.2s;
+    box-sizing: border-box;
+  }
+  
+  .input-group input:focus,
+  .input-group select:focus,
+  .input-group textarea:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  }
+  
+  /* Read Only inputs */
+  .read-only {
+    background-color: #f3f4f6 !important;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+  
+  /* =========================================
+     5. BUTTONS & ACTIONS
+     ========================================= */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border);
+  }
+  
+  .btn {
+    padding: 14px 24px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.2s;
+  }
+  
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary { background: white; border: 1px solid #d1d5db; color: var(--text); }
+  .btn-loc { width: 100%; background: var(--secondary); color: white; margin-top: 5px;}
+  .btn-lg { width: 100%; padding: 16px; font-size: 1.1rem; }
+  
+  .action-buttons-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+  }
+  
+  /* =========================================
+     6. FILE UPLOAD & PREVIEW
+     ========================================= */
+  .file-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    transition: border 0.2s;
+  }
+  .file-card:hover { border-color: var(--primary); }
+  
+  .file-info { display: flex; align-items: center; gap: 12px; }
+  .file-icon { color: var(--primary); font-size: 1.4rem; }
+  .file-info span { font-weight: 600; font-size: 0.95rem; color: #4b5563; }
+  
+  .hidden-input { display: none; }
+  
+  .upload-btn {
+    background: #eff6ff;
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .upload-btn:hover { background: #dbeafe; }
+  
+  .preview-mini img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+  
+  /* =========================================
+     7. PDF PREVIEW (SCROLLABLE)
+     ========================================= */
+  .pdf-scroll-wrapper {
+    overflow-x: auto;
+    padding: 5px;
+    margin: 0 -25px; /* Pull to edges on mobile */
+    padding: 0 25px; /* Push content back in */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .pdf-paper {
+    min-width: 700px; /* Forces Desktop Layout for PDF */
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .pdf-header {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .brand h1 { margin: 0; font-size: 1.8rem; color: var(--primary); }
+  
+  .pdf-row {
+    display: flex;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 8px 0;
+  }
+  .p-label { width: 35%; font-weight: 600; color: #6b7280; font-size: 0.9rem;}
+  .p-value { width: 65%; color: #111827; font-size: 0.95rem;}
+  
+  .pdf-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+  .pdf-img-box img { width: 100%; height: 150px; object-fit: contain; background: #f9fafb; border: 1px solid #eee; }
+  
+  /* Animation */
+  .fade-in { animation: fadeIn 0.4s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
