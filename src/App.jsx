@@ -14,6 +14,7 @@ const CAPACITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // kW
 function App() {
   const [step, setStep] = useState(1);
   const [loadingLoc, setLoadingLoc] = useState(false);
+  const [isSharing, setIsSharing] = useState(false); // Replaces "isSending"
 
   // --- Form State ---
   const [formData, setFormData] = useState({
@@ -69,9 +70,10 @@ function App() {
     setStep(prev => prev - 1);
   };
 
-  // --- PDF & Email Logic ---
+  // --- PDF & Share Logic ---
   const previewRef = useRef();
 
+  // 1. Download Function (Fallback)
   const downloadPDF = () => {
     const element = previewRef.current;
     const opt = {
@@ -79,19 +81,63 @@ function App() {
       filename: `Solar_Reg_${formData.nameAadhar || 'Client'}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
   };
 
-  const sendEmail = () => {
-    const subject = `Registration: ${formData.nameAadhar}`;
-    const body = `Details attached for ${formData.nameAadhar}.\n\nMobile: ${formData.mobile}\nCity: ${formData.city}`;
+  // 2. Share Function (The Fix)
+  const sharePDF = async () => {
+    setIsSharing(true);
 
-    alert("Opening email app...\nPlease attach the downloaded PDF manually.");
-    downloadPDF();
-    window.location.href = `mailto:${formData.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const element = previewRef.current;
+    
+    // Config: Standard quality
+    const opt = {
+      margin: [5, 5, 5, 5],
+      filename: `Solar_Reg_${formData.nameAadhar || 'Client'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      // A. Generate PDF Blob
+      const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+
+      // B. Create File Object
+      const file = new File([pdfBlob], `Solar_Reg_${formData.nameAadhar || 'Client'}.pdf`, {
+        type: "application/pdf",
+      });
+
+      // C. Prepare Share Data
+      const shareData = {
+        title: "Solar Registration Form",
+        text: `Please find the registration details for ${formData.nameAadhar} attached.\nCity: ${formData.city}\nMobile: ${formData.mobile}`,
+        files: [file],
+        mails:"solarbhanvi@gmail.com"
+      };
+
+      // D. Try to Share (Mobile/Supported Browsers)
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // E. Fallback for Desktop (No native share)
+        alert("Native sharing not supported on this device. Downloading file...");
+        downloadPDF();
+        // Optional: Open mail client (without attachment)
+        window.location.href = `mailto:${shareData.mails}?subject=Solar Registration: ${formData.nameAadhar}&body=Please attach the downloaded PDF.`;
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+      // Ignore 'AbortError' (User cancelled share menu)
+      if (err.name !== 'AbortError') {
+        alert("Error generating share file. Downloading instead.");
+        downloadPDF();
+      }
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   // --- Render Steps ---
@@ -247,8 +293,8 @@ function App() {
   const renderStep5 = () => (
     <div className="form-section fade-in">
       <div className="section-header">
-        <h2>Review & Download</h2>
-        <p>Scroll horizontal to view full document</p>
+        <h2>Review & Share</h2>
+        <p>Review details before submitting</p>
       </div>
 
       {/* WRAPPER FOR HORIZONTAL SCROLL ON MOBILE */}
@@ -309,11 +355,16 @@ function App() {
       </div>
 
       <div className="action-buttons-vertical">
-        <button className="btn btn-primary btn-lg" onClick={downloadPDF}>
-          <i className="fa-solid fa-download"></i> Download PDF
+        <button className="btn btn-primary btn-lg" onClick={sharePDF} disabled={isSharing}>
+          {isSharing ? (
+            <span><i className="fa-solid fa-spinner fa-spin"></i> Preparing to Share...</span>
+          ) : (
+            <span><i className="fa-solid fa-share-nodes"></i> Share PDF (Email/WhatsApp)</span>
+          )}
         </button>
-        <button className="btn btn-outline btn-lg" onClick={sendEmail}>
-          <i className="fa-solid fa-envelope"></i> Send via Email
+
+        <button className="btn btn-secondary btn-lg" onClick={downloadPDF} disabled={isSharing}>
+          <i className="fa-solid fa-download"></i> Download Only
         </button>
       </div>
     </div>
@@ -349,17 +400,14 @@ function App() {
 
           {step < 5 && (
             <div className="nav-buttons">
-              {/* PREVIOUS BUTTON (Only shows after Step 1) */}
               {step > 1 ? (
                 <button className="btn btn-secondary" onClick={prevStep} type="button">
                   <i className="fa-solid fa-arrow-left"></i> Previous
                 </button>
               ) : (
-                /* Empty div to keep 'Next' button pushed to the right on Step 1 */
                 <div></div>
               )}
 
-              {/* NEXT BUTTON */}
               <button className="btn btn-primary" onClick={nextStep} type="button">
                 Next <i className="fa-solid fa-arrow-right"></i>
               </button>
